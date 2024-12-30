@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# School-management
-=======
 # School Management System API
 
 A RESTful API service for managing schools, classrooms, and students with role-based access control.
@@ -27,4 +24,3 @@ A RESTful API service for managing schools, classrooms, and students with role-b
 
 Create a `.env` file in the root directory with the following variables:
 
->>>>>>> 22f87e9 (ADDED: app.js + pacakge.json)
