@@ -66,70 +66,70 @@ const router = express.Router();
  */
 router.post('/login', validate(loginSchema), login);
 
-/**
- * @swagger
- * /api/auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - role
- *             properties:
- *               email:
- *                 type: string
- *                 example: newuser@example.com
- *               password:
- *                 type: string
- *                 example: password123
- *               role:
- *                 type: string
- *                 enum: [superadmin, school_admin, student]
- *                 example: school_admin
- *               schoolId:
- *                 type: string
- *                 example: 507f1f77bcf86cd799439011
- *               studentId:
- *                 type: string
- *                 example: 507f1f77bcf86cd799439013
- *           examples:
- *             schoolAdmin:
- *               value:
- *                 email: newadmin@example.com
- *                 password: admin123
- *                 role: school_admin
- *                 schoolId: 507f1f77bcf86cd799439011
- *             student:
- *               value:
- *                 email: newstudent@example.com
- *                 password: student123
- *                 role: student
- *                 schoolId: 507f1f77bcf86cd799439011
- *                 studentId: 507f1f77bcf86cd799439013
- *     responses:
- *       201:
- *         description: User registered successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                 role:
- *                   type: string
- *                   example: school_admin
- *       400:
- *         description: Invalid input
- */
-router.post('/register', validate(registerSchema), register);
+// /**
+//  * @swagger
+//  * /api/auth/register:
+//  *   post:
+//  *     summary: Register a new user
+//  *     tags: [Authentication]
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             required:
+//  *               - email
+//  *               - password
+//  *               - role
+//  *             properties:
+//  *               email:
+//  *                 type: string
+//  *                 example: newuser@example.com
+//  *               password:
+//  *                 type: string
+//  *                 example: password123
+//  *               role:
+//  *                 type: string
+//  *                 enum: [superadmin, school_admin, student]
+//  *                 example: school_admin
+//  *               schoolId:
+//  *                 type: string
+//  *                 example: 507f1f77bcf86cd799439011
+//  *               studentId:
+//  *                 type: string
+//  *                 example: 507f1f77bcf86cd799439013
+//  *           examples:
+//  *             schoolAdmin:
+//  *               value:
+//  *                 email: newadmin@example.com
+//  *                 password: admin123
+//  *                 role: school_admin
+//  *                 schoolId: 507f1f77bcf86cd799439011
+//  *             student:
+//  *               value:
+//  *                 email: newstudent@example.com
+//  *                 password: student123
+//  *                 role: student
+//  *                 schoolId: 507f1f77bcf86cd799439011
+//  *                 studentId: 507f1f77bcf86cd799439013
+//  *     responses:
+//  *       201:
+//  *         description: User registered successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 token:
+//  *                   type: string
+//  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+//  *                 role:
+//  *                   type: string
+//  *                   example: school_admin
+//  *       400:
+//  *         description: Invalid input
+//  */
+// router.post('/register', validate(registerSchema), register);
 
 export default router;
