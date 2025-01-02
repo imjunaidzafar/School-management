@@ -95,7 +95,7 @@ const swaggerOptions = {
       {
         url:
           process.env.ENVIRONMENT === 'production'
-            ? 'https://school-management-ten-psi.vercel.app/' 
+            ? 'https://school-management-api-ruby.vercel.app/' 
             : `http://localhost:${process.env.PORT || 3000}`,
         description:
           process.env.ENVIRONMENT === 'production' ? 'Production server' : 'Development server',

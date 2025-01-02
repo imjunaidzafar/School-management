@@ -11,10 +11,5 @@
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ],
-  "env": {
-    "ENVIRONMENT": "production",
-    "JWT_SECRET": "@jwt-secret",
-    "MONGODB_URI": "@mongodb-uri-prod"
-  }
+  ]
 }
