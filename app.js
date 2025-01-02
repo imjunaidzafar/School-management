@@ -95,7 +95,7 @@ const swaggerOptions = {
       {
         url:
           process.env.ENVIRONMENT === 'production'
-            ? 'https://school-management-api-ruby.vercel.app/' 
+            ? 'https://school-management-api-ruby.vercel.app' // Use your production URL
             : `http://localhost:${process.env.PORT || 3000}`,
         description:
           process.env.ENVIRONMENT === 'production' ? 'Production server' : 'Development server',
@@ -105,7 +105,16 @@ const swaggerOptions = {
   apis: ['./connect/routes/*.js', './swagger-schemas.js'],
 };
 
+// Correctly initialize Swagger
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Serve Swagger JSON
+app.use('/api-docs-json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
