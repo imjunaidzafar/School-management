@@ -4,7 +4,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { apiLimiter } from "./mws/rateLimiter.middleware.js";
 import { errorHandler } from "./mws/errorHandler.middleware.js";
-
 import authRoutes from "./connect/routes/auth.routes.js";
 import schoolRoutes from "./connect/routes/school.routes.js";
 import classroomRoutes from "./connect/routes/classroom.routes.js";
@@ -17,8 +16,8 @@ import { fileURLToPath } from "url";
 
 dotenv.config();
 
-// Get current directory from import.meta.url (for ES modules)
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -28,19 +27,24 @@ app.use(
     origin:
       process.env.ENVIRONMENT === "production"
         ? "https://school-management-api-ruby.vercel.app"
-        : "*", // Adjust based on your production setup
-    methods: ["GET", "POST"],
+        : "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Middleware
+// Basic middleware
 app.use(express.json());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(morgan("dev"));
 app.use(apiLimiter);
 
-// Swagger setup with dynamic server URLs for different environments
+// Swagger configuration
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -48,12 +52,16 @@ const swaggerOptions = {
       title: "School Management API",
       version: "1.0.0",
       description: "API for managing schools, classrooms, and students",
+      contact: {
+        name: "API Support",
+        url: "https://school-management-api-ruby.vercel.app",
+      },
     },
     servers: [
       {
         url:
           process.env.ENVIRONMENT === "production"
-            ? "https://school-management-api-ruby.vercel.app/"
+            ? "https://school-management-api-ruby.vercel.app"
             : `http://localhost:${process.env.PORT || 3000}`,
         description:
           process.env.ENVIRONMENT === "production"
@@ -61,75 +69,60 @@ const swaggerOptions = {
             : "Development server",
       },
     ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
   },
-  apis: ["./connect/routes/*.js", "./swagger-schemas.js"],
+  apis: [
+    path.resolve(__dirname, "./connect/routes/*.js"),
+    path.resolve(__dirname, "./swagger-schemas.js"),
+  ],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Manually serve Swagger UI static assets from node_modules
+// Serve static files for Swagger UI
 app.use(
-  "/api-docs/swagger-ui.css",
-  express.static(
-    path.join(__dirname, "node_modules", "swagger-ui-dist", "swagger-ui.css")
-  )
-);
-app.use(
-  "/api-docs/swagger-ui-bundle.js",
-  express.static(
-    path.join(
-      __dirname,
-      "node_modules",
-      "swagger-ui-dist",
-      "swagger-ui-bundle.js"
-    )
-  )
-);
-app.use(
-  "/api-docs/swagger-ui-standalone-preset.js",
-  express.static(
-    path.join(
-      __dirname,
-      "node_modules",
-      "swagger-ui-dist",
-      "swagger-ui-standalone-preset.js"
-    )
-  )
+  "/swagger-ui",
+  express.static(path.join(__dirname, "node_modules/swagger-ui-dist"))
 );
 
-// Set up Swagger UI with the correct settings
+// Setup Swagger UI
 app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
-    customCssUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.50.0/swagger-ui.css", // Use CDN for production
-    customJsUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.50.0/swagger-ui-bundle.js",
-    oauth2RedirectUrl:
-      process.env.ENVIRONMENT === "production"
-        ? "https://school-management-api-ruby.vercel.app/api-docs/oauth2-redirect"
-        : "http://localhost:3000/api-docs/oauth2-redirect", // Adjust for local and production
+    explorer: true,
+    customSiteTitle: "School Management API Documentation",
+    swaggerOptions: {
+      url: "/swagger.json", // This will serve the Swagger spec JSON
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: "none",
+      filter: true,
+    },
   })
 );
 
-// Routes
+// Serve Swagger spec as JSON
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/classrooms", classroomRoutes);
 app.use("/api/students", studentRoutes);
 
-// Error handling middleware
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    environment: process.env.ENVIRONMENT || "development",
+  });
+});
+
+// Error handling
 app.use(errorHandler);
 
 export default app;

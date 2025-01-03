@@ -199,7 +199,8 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Student'
-*     SchoolListResponse:
+ *
+ *     SchoolListResponse:
  *       allOf:
  *         - $ref: '#/components/schemas/ApiResponse'
  *         - type: object
