@@ -21,6 +21,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// **Set trust proxy**
+app.set("trust proxy", 1); // Trust the first proxy
+
 // CORS configuration
 app.use(
   cors({

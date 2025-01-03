@@ -2,31 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.js",
+      "src": "index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/swagger.json",
-      "dest": "/app.js"
-    },
-    {
-      "src": "/swagger-ui/(.*)",
-      "dest": "/app.js"
-    },
-    {
-      "src": "/api-docs/(.*)",
-      "dest": "/app.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/app.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/app.js"
+      "dest": "index.js"
     }
   ]
 }
-
