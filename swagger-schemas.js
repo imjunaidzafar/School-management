@@ -2,6 +2,42 @@
  * @swagger
  * components:
  *   schemas:
+ *     ApiResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           description: Indicates if the operation was successful
+ *         message:
+ *           type: string
+ *           description: A human-readable message describing the result
+ *         data:
+ *           type: object
+ *           description: The response payload
+ *     
+ *     ValidationError:
+ *       type: object
+ *       properties:
+ *         field:
+ *           type: string
+ *           description: The field that failed validation
+ *         message:
+ *           type: string
+ *           description: The validation error message
+ *
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *         details:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ValidationError'
+ *
  *     LoginInput:
  *       type: object
  *       required:
@@ -16,6 +52,21 @@
  *           type: string
  *           example: superadmin123
  *           description: User's password
+ * 
+ *     LoginResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 role:
+ *                   type: string
+ *                   example: superadmin
  * 
  *     School:
  *       type: object
@@ -53,6 +104,14 @@
  *           type: string
  *           format: date-time
  *           example: 2023-01-01T00:00:00.000Z
+ * 
+ *     SchoolResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               $ref: '#/components/schemas/School'
  * 
  *     CreateSchool:
  *       type: object
@@ -112,6 +171,43 @@
  *           type: string
  *           format: date-time
  *           example: 2023-01-01T00:00:00.000Z
+ * 
+ *     ClassroomResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               $ref: '#/components/schemas/Classroom'
+ *
+ *     ClassroomListResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Classroom'
+ * 
+ *     StudentListResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Student'
+*     SchoolListResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/School'
  * 
  *     CreateClassroom:
  *       type: object
@@ -181,6 +277,14 @@
  *           format: date-time
  *           example: 2023-01-01T00:00:00.000Z
  * 
+ *     StudentResponse:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ApiResponse'
+ *         - type: object
+ *           properties:
+ *             data:
+ *               $ref: '#/components/schemas/Student'
+ * 
  *     CreateStudent:
  *       type: object
  *       required:
@@ -222,6 +326,62 @@
  *         newClassroomId:
  *           type: string
  *           example: 507f1f77bcf86cd799439015
+ *
+ *   responses:
+ *     BadRequest:
+ *       description: Invalid input data
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ErrorResponse'
+ *           example:
+ *             success: false
+ *             message: Validation error
+ *             details:
+ *               - field: name
+ *                 message: Name is required
+ *               - field: capacity
+ *                 message: Capacity must be a positive number
+ *
+ *     Unauthorized:
+ *       description: Authentication failed
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ErrorResponse'
+ *           example:
+ *             success: false
+ *             message: Invalid token
+ *
+ *     Forbidden:
+ *       description: Permission denied
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ErrorResponse'
+ *           example:
+ *             success: false
+ *             message: You don't have permission to perform this action
+ *
+ *     NotFound:
+ *       description: Resource not found
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ErrorResponse'
+ *           example:
+ *             success: false
+ *             message: Resource not found
+ *
+ *     InternalServerError:
+ *       description: Server error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ErrorResponse'
+ *           example:
+ *             success: false
+ *             message: Internal server error
  * 
  *   securitySchemes:
  *     bearerAuth:

@@ -16,7 +16,7 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Schools
- *   description: School management
+ *   description: School management endpoints
  */
 
 /**
@@ -24,6 +24,7 @@ const router = express.Router();
  * /api/schools:
  *   post:
  *     summary: Create a new school
+ *     description: Create a new school with the provided details. Requires superadmin role.
  *     tags: [Schools]
  *     security:
  *       - bearerAuth: []
@@ -32,33 +33,17 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - address
- *               - contactNumber
- *               - email
- *             properties:
- *               name:
- *                 type: string
- *                 example: Example School
- *               address:
- *                 type: string
- *                 example: 123 School St, City, Country
- *               contactNumber:
- *                 type: string
- *                 example: 1234567890
- *               email:
- *                 type: string
- *                 example: contact@exampleschool.com
+ *             $ref: '#/components/schemas/CreateSchool'
  *           examples:
- *             school1:
+ *             basicSchool:
+ *               summary: Basic school
  *               value:
  *                 name: Example School
  *                 address: 123 School St, City, Country
  *                 contactNumber: 1234567890
  *                 email: contact@exampleschool.com
- *             school2:
+ *             detailedSchool:
+ *               summary: Detailed school
  *               value:
  *                 name: Secondary School
  *                 address: 456 Education Ave, City, Country
@@ -67,30 +52,67 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: School created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SchoolResponse'
+ *             example:
+ *               success: true
+ *               message: School created successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439011
+ *                 name: Example School
+ *                 address: 123 School St, City, Country
+ *                 contactNumber: 1234567890
+ *                 email: contact@exampleschool.com
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   get:
  *     summary: Get all schools
+ *     description: Retrieve a list of all schools. Results are filtered based on user role.
  *     tags: [Schools]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of schools
+ *         description: List of schools retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/School'
+ *               $ref: '#/components/schemas/SchoolListResponse'
+ *             example:
+ *               success: true
+ *               message: Schools retrieved successfully
+ *               data:
+ *                 - _id: 507f1f77bcf86cd799439011
+ *                   name: Example School
+ *                   address: 123 School St, City, Country
+ *                   contactNumber: 1234567890
+ *                   email: contact@exampleschool.com
+ *                   createdAt: "2023-01-01T00:00:00.000Z"
+ *                   updatedAt: "2023-01-01T00:00:00.000Z"
+ *                 - _id: 507f1f77bcf86cd799439012
+ *                   name: Secondary School
+ *                   address: 456 Education Ave, City, Country
+ *                   contactNumber: 9876543210
+ *                   email: info@secondaryschool.com
+ *                   createdAt: "2023-01-01T00:00:00.000Z"
+ *                   updatedAt: "2023-01-01T00:00:00.000Z"
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.use(authenticate);
 
@@ -104,6 +126,7 @@ router
  * /api/schools/{id}:
  *   get:
  *     summary: Get a school by ID
+ *     description: Retrieve detailed information about a specific school.
  *     tags: [Schools]
  *     security:
  *       - bearerAuth: []
@@ -113,22 +136,38 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the school to retrieve
  *         example: 507f1f77bcf86cd799439011
  *     responses:
  *       200:
- *         description: School details
+ *         description: School details retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/School'
+ *               $ref: '#/components/schemas/SchoolResponse'
+ *             example:
+ *               success: true
+ *               message: School retrieved successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439011
+ *                 name: Example School
+ *                 address: 123 School St, City, Country
+ *                 contactNumber: 1234567890
+ *                 email: contact@exampleschool.com
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: School not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   put:
  *     summary: Update a school
+ *     description: Update the details of an existing school.
  *     tags: [Schools]
  *     security:
  *       - bearerAuth: []
@@ -138,6 +177,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the school to update
  *         example: 507f1f77bcf86cd799439011
  *     requestBody:
  *       required: true
@@ -154,24 +194,54 @@ router
  *                 type: string
  *               email:
  *                 type: string
- *           example:
- *             name: Updated School Name
- *             address: 789 New Address, City, Country
- *             contactNumber: 5551234567
- *             email: updated@school.com
+ *           examples:
+ *             updateName:
+ *               summary: Update school name
+ *               value:
+ *                 name: Updated School Name
+ *             updateAddress:
+ *               summary: Update school address
+ *               value:
+ *                 address: 789 New Address, City, Country
+ *             updateAll:
+ *               summary: Update all fields
+ *               value:
+ *                 name: Updated School Name
+ *                 address: 789 New Address, City, Country
+ *                 contactNumber: 5551234567
+ *                 email: updated@school.com
  *     responses:
  *       200:
  *         description: School updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SchoolResponse'
+ *             example:
+ *               success: true
+ *               message: School updated successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439011
+ *                 name: Updated School Name
+ *                 address: 789 New Address, City, Country
+ *                 contactNumber: 5551234567
+ *                 email: updated@school.com
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: School not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   delete:
  *     summary: Delete a school
+ *     description: Delete an existing school. This action cannot be undone.
  *     tags: [Schools]
  *     security:
  *       - bearerAuth: []
@@ -181,16 +251,33 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the school to delete
  *         example: 507f1f77bcf86cd799439011
  *     responses:
  *       200:
  *         description: School deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: School deleted successfully
+ *             example:
+ *               success: true
+ *               message: School deleted successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: School not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router
   .route('/:id')
@@ -199,3 +286,4 @@ router
   .delete(authorize('superadmin'), deleteSchool);
 
 export default router;
+

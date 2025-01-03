@@ -16,7 +16,7 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Classrooms
- *   description: Classroom management
+ *   description: Classroom management endpoints
  */
 
 /**
@@ -24,6 +24,7 @@ const router = express.Router();
  * /api/classrooms:
  *   post:
  *     summary: Create a new classroom
+ *     description: Create a new classroom with the provided details. Requires superadmin or school_admin role.
  *     tags: [Classrooms]
  *     security:
  *       - bearerAuth: []
@@ -32,66 +33,85 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - capacity
- *               - schoolId
- *             properties:
- *               name:
- *                 type: string
- *                 example: Class A
- *               capacity:
- *                 type: number
- *                 example: 30
- *               schoolId:
- *                 type: string
- *                 example: 507f1f77bcf86cd799439011
- *               resources:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["Whiteboard", "Projector"]
+ *             $ref: '#/components/schemas/CreateClassroom'
  *           examples:
- *             classA:
+ *             basicClassroom:
+ *               summary: Basic classroom
  *               value:
  *                 name: Class A
  *                 capacity: 30
  *                 schoolId: 507f1f77bcf86cd799439011
- *                 resources: ["Whiteboard", "Projector"]
- *             classB:
+ *             classroomWithResources:
+ *               summary: Classroom with resources
  *               value:
- *                 name: Class B
+ *                 name: Computer Lab
  *                 capacity: 25
  *                 schoolId: 507f1f77bcf86cd799439011
- *                 resources: ["Whiteboard", "Computers"]
+ *                 resources: ["Computers", "Projector", "Whiteboard"]
  *     responses:
  *       201:
  *         description: Classroom created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ClassroomResponse'
+ *             example:
+ *               success: true
+ *               message: Classroom created successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439012
+ *                 name: Class A
+ *                 capacity: 30
+ *                 schoolId: 507f1f77bcf86cd799439011
+ *                 resources: ["Whiteboard", "Projector"]
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   get:
  *     summary: Get all classrooms
+ *     description: Retrieve a list of all classrooms. Results are filtered based on user role.
  *     tags: [Classrooms]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of classrooms
+ *         description: List of classrooms retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Classroom'
+ *               $ref: '#/components/schemas/ClassroomListResponse'
+ *             example:
+ *               success: true
+ *               message: Classrooms retrieved successfully
+ *               data:
+ *                 - _id: 507f1f77bcf86cd799439012
+ *                   name: Class A
+ *                   capacity: 30
+ *                   schoolId: 507f1f77bcf86cd799439011
+ *                   resources: ["Whiteboard", "Projector"]
+ *                   createdAt: "2023-01-01T00:00:00.000Z"
+ *                   updatedAt: "2023-01-01T00:00:00.000Z"
+ *                 - _id: 507f1f77bcf86cd799439013
+ *                   name: Computer Lab
+ *                   capacity: 25
+ *                   schoolId: 507f1f77bcf86cd799439011
+ *                   resources: ["Computers", "Projector", "Whiteboard"]
+ *                   createdAt: "2023-01-01T00:00:00.000Z"
+ *                   updatedAt: "2023-01-01T00:00:00.000Z"
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.use(authenticate);
 
@@ -105,6 +125,7 @@ router
  * /api/classrooms/{id}:
  *   get:
  *     summary: Get a classroom by ID
+ *     description: Retrieve detailed information about a specific classroom.
  *     tags: [Classrooms]
  *     security:
  *       - bearerAuth: []
@@ -114,22 +135,38 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the classroom to retrieve
  *         example: 507f1f77bcf86cd799439012
  *     responses:
  *       200:
- *         description: Classroom details
+ *         description: Classroom details retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Classroom'
+ *               $ref: '#/components/schemas/ClassroomResponse'
+ *             example:
+ *               success: true
+ *               message: Classroom retrieved successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439012
+ *                 name: Class A
+ *                 capacity: 30
+ *                 schoolId: 507f1f77bcf86cd799439011
+ *                 resources: ["Whiteboard", "Projector"]
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Classroom not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   put:
  *     summary: Update a classroom
+ *     description: Update the details of an existing classroom.
  *     tags: [Classrooms]
  *     security:
  *       - bearerAuth: []
@@ -139,6 +176,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the classroom to update
  *         example: 507f1f77bcf86cd799439012
  *     requestBody:
  *       required: true
@@ -155,23 +193,57 @@ router
  *                 type: array
  *                 items:
  *                   type: string
- *           example:
- *             name: Updated Class A
- *             capacity: 35
- *             resources: ["Whiteboard", "Projector", "Computers"]
+ *           examples:
+ *             updateName:
+ *               summary: Update classroom name
+ *               value:
+ *                 name: Updated Class A
+ *             updateCapacity:
+ *               summary: Update classroom capacity
+ *               value:
+ *                 capacity: 35
+ *             updateResources:
+ *               summary: Update classroom resources
+ *               value:
+ *                 resources: ["Whiteboard", "Projector", "Computers"]
+ *             updateAll:
+ *               summary: Update all fields
+ *               value:
+ *                 name: Updated Class A
+ *                 capacity: 35
+ *                 resources: ["Whiteboard", "Projector", "Computers"]
  *     responses:
  *       200:
  *         description: Classroom updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ClassroomResponse'
+ *             example:
+ *               success: true
+ *               message: Classroom updated successfully
+ *               data:
+ *                 _id: 507f1f77bcf86cd799439012
+ *                 name: Updated Class A
+ *                 capacity: 35
+ *                 schoolId: 507f1f77bcf86cd799439011
+ *                 resources: ["Whiteboard", "Projector", "Computers"]
+ *                 createdAt: "2023-01-01T00:00:00.000Z"
+ *                 updatedAt: "2023-01-01T00:00:00.000Z"
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Classroom not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ * 
  *   delete:
  *     summary: Delete a classroom
+ *     description: Delete an existing classroom. This action cannot be undone.
  *     tags: [Classrooms]
  *     security:
  *       - bearerAuth: []
@@ -181,16 +253,33 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the classroom to delete
  *         example: 507f1f77bcf86cd799439012
  *     responses:
  *       200:
  *         description: Classroom deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Classroom deleted successfully
+ *             example:
+ *               success: true
+ *               message: Classroom deleted successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Classroom not found
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router
   .route('/:id')
